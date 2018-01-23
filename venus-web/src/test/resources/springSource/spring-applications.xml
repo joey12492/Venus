@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd"
+	default-lazy-init="false">
+
+    <!-- 加载配置文件 -->
+    <context:property-placeholder location="classpath*:testResource/venus-db.properties,classpath:testResource/venus-redis.properties,classpath*:testResource/venus-mongo.properties"/>
+    <!-- 扫描文件 -->
+    <context:annotation-config/>
+    <!-- 配置要扫描的包 -->
+    <context:component-scan base-package="com.babel.venus.service,com.babel.venus.storage,com.babel.venus.dao" />
+
+    <aop:aspectj-autoproxy proxy-target-class="true" />
+
+	<!-- proxy-target-class默认"false",更改为"ture"使用CGLib动态代理 -->
+
+	<import resource="spring-mybatis.xml" />
+	<import resource="spring-cache-redis.xml" />
+	<import resource="mongo-db-venus.xml" />
+
+</beans>

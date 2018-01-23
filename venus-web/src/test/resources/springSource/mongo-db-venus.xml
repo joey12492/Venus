@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/data/mongo
+         http://www.springframework.org/schema/data/mongo/spring-mongo.xsd">
+
+    <!-- Factory bean that creates the Mongoinstance -->
+    <!-- credentials="admin:admin@admin" -->
+    <mongo:mongo-client replica-set="${mongo.venus.replica}" id="mongo">
+        <mongo:client-options write-concern="SAFE" connections-per-host="100"
+                              threads-allowed-to-block-for-connection-multiplier="50"/>
+    </mongo:mongo-client>
+
+    <mongo:db-factory id="mongoDbFactory" dbname="${mongo.venus.dbname}" mongo-ref="mongo"/>
+
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
+    </bean>
+
+    <!--账号系统的mongo-->
+
+    <!--<mongo:mongo-client replica-set="${mongo.crius.replica}" id="mongoAccount">
+        <mongo:client-options write-concern="SAFE" connections-per-host="60"
+                              threads-allowed-to-block-for-connection-multiplier="30"/>
+    </mongo:mongo-client>
+
+    <mongo:db-factory id="mongoDbFactoryAccount" dbname="${mongo.account.dbname}" mongo-ref="mongoAccount"/>
+
+    <bean id="mongoTemplateAccount" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactoryAccount" />
+    </bean>-->
+
+</beans>

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <version>1.5.4.RELEASE</version>
+        <relativePath/>
+    </parent>
+
+    <properties>
+        <!-- venus -->
+        <venus.version>0.0.1-SNAPSHOT</venus.version>
+        <venus-api.version>0.0.1-SNAPSHOT</venus-api.version>
+        <venus-service.version>0.0.1-SNAPSHOT</venus-service.version>
+        <venus-web.version>0.0.1-SNAPSHOT</venus-web.version>
+
+        <common-parent.version>1.0.0-SNAPSHOT</common-parent.version>
+        <common-config.version>0.0.1-SNAPSHOT</common-config.version>
+        <common-core.version>0.0.1-SNAPSHOT</common-core.version>
+        <common-web.version>0.0.1-SNAPSHOT</common-web.version>
+        <common-constant.version>0.0.1-SNAPSHOT</common-constant.version>
+
+        <jackson-databind.version>0.0.1-SNAPSHOT</jackson-databind.version>
+        <compile.jdk.version>1.8</compile.jdk.version>
+
+        <argLine>-Djava.security.egd=file:/dev/./urandom -Xmx256m</argLine>
+        <assertj.version>3.6.2</assertj.version>
+        <awaitility.version>2.0.0</awaitility.version>
+        <commons-io.version>2.5</commons-io.version>
+        <commons-lang.version>3.5</commons-lang.version>
+        <cucumber.version>1.2.4</cucumber.version>
+        <docker-maven-plugin.version>0.4.13</docker-maven-plugin.version>
+        <!-- Overridden to get metrics-jcache -->
+        <jjwt.version>0.7.0</jjwt.version>
+        <dropwizard-metrics.version>3.2.2</dropwizard-metrics.version>
+        <gatling.version>2.2.5</gatling.version>
+        <gatling-maven-plugin.version>2.2.4</gatling-maven-plugin.version>
+        <hazelcast-hibernate52.version>1.2</hazelcast-hibernate52.version>
+        <hibernate.version>5.2.8.Final</hibernate.version>
+        <hikaricp.version>2.6.0</hikaricp.version>
+        <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
+        <java.version>1.8</java.version>
+        <jcache.version>1.0.0</jcache.version>
+        <jzlib.version>1.1.3</jzlib.version>
+        <jhipster.server.version>1.1.8</jhipster.server.version>
+        <liquibase-hibernate5.version>3.6</liquibase-hibernate5.version>
+        <liquibase-slf4j.version>2.0.0</liquibase-slf4j.version>
+        <logstash-logback-encoder.version>4.9</logstash-logback-encoder.version>
+        <m2e.apt.activation>jdt_apt</m2e.apt.activation>
+        <mapstruct.version>1.1.0.Final</mapstruct.version>
+        <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
+        <maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
+        <maven-resources-plugin.version>3.0.1</maven-resources-plugin.version>
+        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.version>3.0.0</maven.version>
+        <metrics-spring.version>3.1.3</metrics-spring.version>
+        <node.version>v6.11.1</node.version>
+        <!-- These remain empty unless the corresponding profile is active -->
+        <profile.no-liquibase/>
+        <profile.swagger/>
+        <prometheus-simpleclient.version>0.0.20</prometheus-simpleclient.version>
+        <!-- Sonar properties -->
+        <project.testresult.directory>${project.build.directory}/test-results</project.testresult.directory>
+        <run.addResources>false</run.addResources>
+        <scala-maven-plugin.version>3.2.2</scala-maven-plugin.version>
+        <scala.version>2.12.1</scala.version>
+        <sonar-maven-plugin.version>3.2</sonar-maven-plugin.version>
+
+        <sonar.exclusions>src/main/webapp/content/**/*.*, src/main/webapp/bower_components/**/*.*,
+            src/main/webapp/i18n/*.js, target/www/**/*.*
+        </sonar.exclusions>
+
+        <sonar.issue.ignore.multicriteria>S3437,UndocumentedApi,BoldAndItalicTagsCheck
+        </sonar.issue.ignore.multicriteria>
+
+        <!-- Rule https://sonarqube.com/coding_rules#rule_key=Web%3ABoldAndItalicTagsCheck is ignored. Even if we agree that using the "i" tag is an awful practice, this is what is recommended by http://fontawesome.io/examples/ -->
+        <sonar.issue.ignore.multicriteria.BoldAndItalicTagsCheck.resourceKey>src/main/webapp/app/**/*.*
+        </sonar.issue.ignore.multicriteria.BoldAndItalicTagsCheck.resourceKey>
+        <sonar.issue.ignore.multicriteria.BoldAndItalicTagsCheck.ruleKey>Web:BoldAndItalicTagsCheck
+        </sonar.issue.ignore.multicriteria.BoldAndItalicTagsCheck.ruleKey>
+        <!-- Rule https://sonarqube.com/coding_rules#rule_key=squid%3AS3437 is ignored, as a JPA-managed field cannot be transient -->
+        <sonar.issue.ignore.multicriteria.S3437.resourceKey>src/main/java/**/*
+        </sonar.issue.ignore.multicriteria.S3437.resourceKey>
+        <sonar.issue.ignore.multicriteria.S3437.ruleKey>squid:S3437</sonar.issue.ignore.multicriteria.S3437.ruleKey>
+        <!-- Rule http://sonarqube.com/coding_rules#rule_key=squid%3AUndocumentedApi is ignored, as we want to follow "clean code" guidelines and classes, methods and arguments names should be self-explanatory -->
+        <sonar.issue.ignore.multicriteria.UndocumentedApi.resourceKey>src/main/java/**/*
+        </sonar.issue.ignore.multicriteria.UndocumentedApi.resourceKey>
+        <sonar.issue.ignore.multicriteria.UndocumentedApi.ruleKey>squid:UndocumentedApi
+        </sonar.issue.ignore.multicriteria.UndocumentedApi.ruleKey>
+
+        <sonar.jacoco.itReportPath>${project.testresult.directory}/coverage/jacoco/jacoco-it.exec
+        </sonar.jacoco.itReportPath>
+        <sonar.jacoco.reportPath>${project.testresult.directory}/coverage/jacoco/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.java.codeCoveragePlugin>jacoco</sonar.java.codeCoveragePlugin>
+
+        <sonar.javascript.jstestdriver.reportsPath>${project.testresult.directory}/karma
+        </sonar.javascript.jstestdriver.reportsPath>
+        <!-- For Sonar < 6.2 -->
+        <sonar.javascript.lcov.reportPath>${project.testresult.directory}/coverage/report-lcov/lcov.info
+        </sonar.javascript.lcov.reportPath>
+        <!-- For Sonar >= 6.2 -->
+        <sonar.javascript.lcov.reportPaths>${project.testresult.directory}/coverage/report-lcov/lcov.info
+        </sonar.javascript.lcov.reportPaths>
+
+        <sonar.sources>${project.basedir}/src/main/</sonar.sources>
+        <sonar.surefire.reportsPath>${project.testresult.directory}/surefire-reports</sonar.surefire.reportsPath>
+        <sonar.tests>${project.basedir}/src/test/</sonar.tests>
+
+        <!-- Spring properties -->
+        <spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
+        <spring-security-oauth.version>2.0.12.RELEASE</spring-security-oauth.version>
+        <springfox.version>2.7.0</springfox.version>
+        <validation-api.version>1.1.0.Final</validation-api.version>
+        <yarn.version>v0.27.5</yarn.version>
+        <spring-integration-kafka.version>2.1.0.RELEASE</spring-integration-kafka.version>
+    </properties>
+
+    <groupId>com.babel.venus</groupId>
+    <artifactId>venus</artifactId>
+    <packaging>pom</packaging>
+    <version>0.0.1-SNAPSHOT</version>
+    <modules>
+        <module>venus-api</module>
+        <module>venus-service</module>
+        <module>venus-web</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <dependency>
+                <groupId>com.babel.venus</groupId>
+                <artifactId>venus-service</artifactId>
+                <version>${venus-service.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.babel.venus</groupId>
+                <artifactId>venus-web</artifactId>
+                <version>${venus-web.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.babel.common</groupId>
+                <artifactId>common-core</artifactId>
+                <version>${common-core.version}</version>
+            </dependency>
+            <dependency>
+	            <groupId>com.babel.common</groupId>
+	            <artifactId>common-constant</artifactId>
+	            <version>${common-constant.version}</version>
+	        </dependency>
+
+            <!--spring-json依赖-->
+            <!--<dependency>-->
+            <!--<groupId>com.fasterxml.jackson.core</groupId>-->
+            <!--<artifactId>jackson-databind</artifactId>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+            <!--<groupId>com.magic.commons</groupId>-->
+            <!--<artifactId>log</artifactId>-->
+            <!--<version>1.0.0-SNAPSHOT</version>-->
+            <!--</dependency>-->
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>2.9.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.babel</groupId>
+                <artifactId>risk-management-api</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
+
+    <distributionManagement>
+        <!--
+        <repository>
+            <id>releases</id>
+            <uniqueVersion>true</uniqueVersion>
+            <name>Internal Release Repository</name>
+            <url>http://192.168.0.253:8081/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <uniqueVersion>true</uniqueVersion>
+            <name>Internal Snapshot Repository</name>
+            <url>http://192.168.0.253:8081/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+        -->
+        <!-- 	-->
+        <repository>
+            <id>releases</id>
+            <uniqueVersion>true</uniqueVersion>
+            <name>Internal Release Repository</name>
+            <url>http://maven.blr58589.com/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>releases</id>
+            <uniqueVersion>true</uniqueVersion>
+            <name>Internal Snapshot Repository</name>
+            <url>http://maven.blr58589.com/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+</project>

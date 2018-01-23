@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.babel.venus.dao.db.UserOrderMapper">
+    <resultMap id="BaseResultMap" type="com.babel.forseti_order.model.UserOrderPO">
+        <id column="cid" jdbcType="BIGINT" property="cid" />
+        <result column="plat_info_id" jdbcType="BIGINT" property="platInfoId" />
+        <result column="owner_info" jdbcType="VARCHAR" property="ownerInfo" />
+        <result column="parent_order_id" jdbcType="VARCHAR" property="parentOrderId" />
+        <result column="order_id" jdbcType="VARCHAR" property="orderId" />
+        <result column="member_id" jdbcType="BIGINT" property="memberId" />
+        <result column="member_name" jdbcType="VARCHAR" property="memberName" />
+        <result column="lottery_id" jdbcType="BIGINT" property="lotteryId" />
+        <result column="play_id" jdbcType="BIGINT" property="playId" />
+        <result column="pcode" jdbcType="BIGINT" property="pcode" />
+        <result column="pdate" jdbcType="INTEGER" property="pcode" />
+        <result column="bet_time" jdbcType="BIGINT" property="betTime" />
+        <result column="reforward_point" jdbcType="INTEGER" property="reforwardPoint" />
+        <result column="bet_mode" jdbcType="BIGINT" property="betMode" />
+        <result column="bet_count" jdbcType="INTEGER" property="betCount" />
+        <result column="bet_amount" jdbcType="BIGINT" property="betAmount" />
+        <result column="bet_content" jdbcType="VARCHAR" property="betContent" />
+        <result column="multiple" jdbcType="INTEGER" property="multiple" />
+        <result column="money_mode" jdbcType="VARCHAR" property="moneyMode" />
+        <result column="side_type" jdbcType="INTEGER" property="sideType" />
+        <result column="ac_type" jdbcType="INTEGER" property="acType" />
+        <result column="if_chase" jdbcType="INTEGER" property="ifChase" />
+        <result column="chase_count" jdbcType="INTEGER" property="chaseCount" />
+        <result column="chase_win_stop" jdbcType="INTEGER" property="chaseWinStop" />
+        <result column="payoff" jdbcType="BIGINT" property="payoff" />
+        <result column="win_pay_rate" jdbcType="INTEGER" property="winPayRate" />
+        <result column="win_number" jdbcType="VARCHAR" property="winNumber" />
+        <result column="order_status" jdbcType="INTEGER" property="orderStatus" />
+        <result column="source" jdbcType="INTEGER" property="source" />
+        <result column="remark" jdbcType="VARCHAR" property="remark" />
+        <result column="create_time" jdbcType="BIGINT" property="createTime" />
+        <result column="create_user" jdbcType="BIGINT" property="createUser" />
+        <result column="modify_time" jdbcType="BIGINT" property="modifyTime" />
+        <result column="modify_user" jdbcType="BIGINT" property="modifyUser" />
+        <result column="cancel_fee" jdbcType="BIGINT" property="cancelFee" />
+        <result column="chase_seq" jdbcType="INTEGER" property="chaseSeq" />
+        <result column="issue_alias" jdbcType="VARCHAR" property="issueAlias" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        cid, plat_info_id, owner_info, parent_order_id, order_id, member_id, member_name, lottery_id,
+        play_id, pcode, pdate, bet_time, reforward_point, bet_mode, bet_count, bet_amount, bet_content,
+        multiple, money_mode, side_type, ac_type, if_chase, chase_count, chase_win_stop,
+        payoff, win_pay_rate, win_number, order_status, source, remark, create_time, create_user, modify_time,
+        modify_user, cancel_fee,chase_seq, issue_alias
+     </sql>
+    <!--<select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from lo_user_order
+        where cid = #{cid,jdbcType=BIGINT}
+    </select>-->
+
+
+    <!-- 条件检索所有-->
+    <select id="findOrders" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from
+        <choose>
+            <when test="pdate == null">
+                lo_user_order
+            </when>
+            <otherwise>
+                lo_user_order_${pdate}
+            </otherwise>
+        </choose>
+
+        <where>
+            <if test="param.orderId != null and param.orderId != ''">
+                and order_id = #{param.orderId}
+            </if>
+            <if test="param.pcode != null and param.pcode != 0">
+                and  pcode = #{param.pcode}
+            </if>
+            <if test="param.pdate != null and param.pdate != 0">
+                and  pdate = #{param.pdate}
+            </if>
+            <if test="param.orderStatus != null and param.orderStatus > 0">
+                and order_status = #{param.orderStatus}
+            </if>
+            <if test="param.playId != null and param.playId > 0">
+                and playId = #{param.playId}
+            </if>
+            <if test="param.lotteryId != null and param.lotteryId > 0">
+                and lottery_id = #{param.lotteryId}
+            </if>
+            <if test="param.ifChase != null and param.ifChase > 0">
+                and if_chase = #{param.ifChase}
+            </if>
+        </where>
+    </select>
+
+    <!-- 获取当期无效的追单数据-->
+    <!--<select id="findChase" parameterType="com.babel.venus.vo.UserOrderVo" resultMap="BaseResultMap">-->
+    <!--select-->
+    <!--cid,-->
+    <!--parent_order_id-->
+    <!--from lo_user_order-->
+    <!--WHERE if_chase = #{ifChase}-->
+    <!--AND order_status != #{orderStatus}-->
+    <!--AND pcode =#{pcode}-->
+    <!--</select>-->
+
+
+    <!--<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">-->
+    <!--delete from lo_user_order-->
+    <!--where cid = #{cid,jdbcType=BIGINT}-->
+    <!--</delete>-->
+    <insert id="insertByDate" parameterType="com.babel.forseti_order.model.UserOrderPO">
+       insert into
+        <choose>
+            <when  test="pdate == null">
+                lo_user_order
+            </when>
+            <otherwise>
+                lo_user_order_${pdate}
+            </otherwise>
+        </choose>
+        ( plat_info_id, owner_info,
+          parent_order_id, order_id, member_id, member_name,
+          lottery_id, play_id, pcode,pdate,
+          bet_time, reforward_point, bet_mode,
+          bet_count, bet_amount, bet_content,
+          multiple, money_mode, side_type,
+          ac_type, if_chase, chase_count,
+          chase_win_stop, payoff, win_pay_rate, win_number,
+          order_status, source, remark,
+          create_time, create_user, modify_time,
+          modify_user, cancel_fee, chase_seq, issue_alias)
+        values (  #{platInfoId,jdbcType=BIGINT}, #{ownerInfo,jdbcType=VARCHAR},
+          #{parentOrderId,jdbcType=VARCHAR}, #{orderId,jdbcType=VARCHAR}, #{memberId,jdbcType=BIGINT}, #{memberName},
+          #{lotteryId,jdbcType=BIGINT}, #{playId,jdbcType=BIGINT}, #{pcode,jdbcType=BIGINT},#{pdate,jdbcType=INTEGER},
+          #{betTime,jdbcType=BIGINT}, #{reforwardPoint,jdbcType=INTEGER}, #{betMode,jdbcType=BIGINT},
+          #{betCount,jdbcType=INTEGER}, #{betAmount,jdbcType=BIGINT}, #{betContent,jdbcType=VARCHAR},
+          #{multiple,jdbcType=INTEGER}, #{moneyMode,jdbcType=VARCHAR}, #{sideType,jdbcType=INTEGER},
+          #{acType,jdbcType=INTEGER}, #{ifChase,jdbcType=INTEGER}, #{chaseCount,jdbcType=INTEGER},
+          #{chaseWinStop,jdbcType=INTEGER}, #{payoff,jdbcType=BIGINT}, #{winPayRate,jdbcType=INTEGER},#{winNumber,jdbcType=VARCHAR},
+          #{orderStatus,jdbcType=INTEGER}, #{source,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR},
+          #{createTime,jdbcType=BIGINT}, #{createUser,jdbcType=BIGINT}, #{modifyTime,jdbcType=BIGINT},
+          #{modifyUser,jdbcType=BIGINT}, #{cancelFee,jdbcType=BIGINT}, #{chaseSeq}, #{issueAlias})
+          )
+    </insert>
+
+    <!--批量添加-->
+    <insert id="batchInsert">
+        insert into
+        <choose>
+            <when  test="pdate == null">
+                lo_user_order
+            </when>
+            <otherwise>
+                lo_user_order_${pdate}
+            </otherwise>
+        </choose>
+        (
+            plat_info_id, owner_info,
+            parent_order_id, order_id, member_id, member_name,
+            lottery_id, play_id, pcode,pdate,
+            bet_time, reforward_point, bet_mode,
+            bet_count, bet_amount, bet_content,
+            multiple, money_mode, side_type,
+            ac_type, if_chase, chase_count,
+            chase_win_stop, payoff, win_pay_rate, win_number,
+            order_status, source, remark,
+            create_time, create_user, modify_time,
+            modify_user, cancel_fee,chase_seq, issue_alias
+        )
+        values
+        <foreach collection="list" item="param" separator=",">
+            (
+            #{param.platInfoId,jdbcType=BIGINT}, #{param.ownerInfo,jdbcType=VARCHAR},
+            #{param.parentOrderId,jdbcType=VARCHAR}, #{param.orderId,jdbcType=VARCHAR}, #{param.memberId,jdbcType=BIGINT}, #{param.memberName},
+            #{param.lotteryId,jdbcType=BIGINT}, #{param.playId,jdbcType=BIGINT}, #{param.pcode,jdbcType=BIGINT},#{param.pdate,jdbcType=INTEGER},
+            #{param.betTime,jdbcType=BIGINT}, #{param.reforwardPoint,jdbcType=INTEGER}, #{param.betMode,jdbcType=BIGINT},
+            #{param.betCount,jdbcType=INTEGER}, #{param.betAmount,jdbcType=BIGINT}, #{param.betContent,jdbcType=VARCHAR},
+            #{param.multiple,jdbcType=INTEGER}, #{param.moneyMode,jdbcType=VARCHAR}, #{param.sideType,jdbcType=INTEGER},
+            #{param.acType,jdbcType=INTEGER}, #{param.ifChase,jdbcType=INTEGER}, #{param.chaseCount,jdbcType=INTEGER},
+            #{param.chaseWinStop,jdbcType=INTEGER}, #{param.payoff,jdbcType=BIGINT}, #{param.winPayRate,jdbcType=INTEGER}, #{param.winNumber,jdbcType=VARCHAR},
+            #{param.orderStatus,jdbcType=INTEGER}, #{param.source,jdbcType=INTEGER}, #{param.remark,jdbcType=VARCHAR},
+            #{param.createTime,jdbcType=BIGINT}, #{param.createUser,jdbcType=BIGINT}, #{param.modifyTime,jdbcType=BIGINT},
+            #{param.modifyUser,jdbcType=BIGINT}, #{param.cancelFee,jdbcType=BIGINT}, #{param.chaseSeq}, #{param.issueAlias}
+            )
+        </foreach>
+
+    </insert>
+    <!--<insert id="insertSelective" parameterType="com.babel.forseti_order.model.UserOrderPO">-->
+    <!--insert into lo_user_order-->
+    <!--<trim prefix="(" suffix=")" suffixOverrides=",">-->
+    <!--<if test="cid != null">-->
+    <!--cid,-->
+    <!--</if>-->
+    <!--<if test="userOrderOperId != null">-->
+    <!--user_order_oper_id,-->
+    <!--</if>-->
+    <!--<if test="platInfoId != null">-->
+    <!--plat_info_id,-->
+    <!--</if>-->
+    <!--<if test="ownerInfo != null">-->
+    <!--owner_info,-->
+    <!--</if>-->
+    <!--<if test="parentOrderId != null">-->
+    <!--parent_order_id,-->
+    <!--</if>-->
+    <!--<if test="orderId != null">-->
+    <!--order_id,-->
+    <!--</if>-->
+    <!--<if test="memberId != null">-->
+    <!--member_id,-->
+    <!--</if>-->
+    <!--<if test="lotteryId != null">-->
+    <!--lottery_id,-->
+    <!--</if>-->
+    <!--<if test="playId != null">-->
+    <!--play_id,-->
+    <!--</if>-->
+    <!--<if test="pcode != null">-->
+    <!--pcode,-->
+    <!--</if>-->
+    <!--<if test="betTime != null">-->
+    <!--bet_time,-->
+    <!--</if>-->
+    <!--<if test="reforwardPoint != null">-->
+    <!--reforward_point,-->
+    <!--</if>-->
+    <!--<if test="betMode != null">-->
+    <!--bet_mode,-->
+    <!--</if>-->
+    <!--<if test="betCount != null">-->
+    <!--bet_count,-->
+    <!--</if>-->
+    <!--<if test="betAmount != null">-->
+    <!--bet_amount,-->
+    <!--</if>-->
+    <!--<if test="betNumber != null">-->
+    <!--bet_number,-->
+    <!--</if>-->
+    <!--<if test="multiple != null">-->
+    <!--multiple,-->
+    <!--</if>-->
+    <!--<if test="moneyMode != null">-->
+    <!--money_mode,-->
+    <!--</if>-->
+    <!--<if test="ifChase != null">-->
+    <!--if_chase,-->
+    <!--</if>-->
+    <!--<if test="chaseCount != null">-->
+    <!--chase_count,-->
+    <!--</if>-->
+    <!--<if test="chaseWinStop != null">-->
+    <!--chase_win_stop,-->
+    <!--</if>-->
+    <!--<if test="payoff != null">-->
+    <!--payoff,-->
+    <!--</if>-->
+    <!--<if test="winPayRate != null">-->
+    <!--win_pay_rate,-->
+    <!--</if>-->
+    <!--<if test="orderStatus != null">-->
+    <!--order_status,-->
+    <!--</if>-->
+    <!--<if test="source != null">-->
+    <!--source,-->
+    <!--</if>-->
+    <!--<if test="remark != null">-->
+    <!--remark,-->
+    <!--</if>-->
+    <!--<if test="createTime != null">-->
+    <!--create_time,-->
+    <!--</if>-->
+    <!--<if test="createUser != null">-->
+    <!--create_user,-->
+    <!--</if>-->
+    <!--<if test="modifyTime != null">-->
+    <!--modify_time,-->
+    <!--</if>-->
+    <!--<if test="modifyUser != null">-->
+    <!--modify_user,-->
+    <!--</if>-->
+    <!--</trim>-->
+    <!--<trim prefix="values (" suffix=")" suffixOverrides=",">-->
+    <!--<if test="cid != null">-->
+    <!--#{cid,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="userOrderOperId != null">-->
+    <!--#{userOrderOperId,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="platInfoId != null">-->
+    <!--#{platInfoId,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="ownerInfo != null">-->
+    <!--#{ownerInfo,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="parentOrderId != null">-->
+    <!--#{parentOrderId,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="orderId != null">-->
+    <!--#{orderId,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="memberId != null">-->
+    <!--#{memberId,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="lotteryId != null">-->
+    <!--#{lotteryId,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="playId != null">-->
+    <!--#{playId,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="pcode != null">-->
+    <!--#{pcode,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="betTime != null">-->
+    <!--#{betTime,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="reforwardPoint != null">-->
+    <!--#{reforwardPoint,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="betMode != null">-->
+    <!--#{betMode,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="betCount != null">-->
+    <!--#{betCount,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="betAmount != null">-->
+    <!--#{betAmount,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="betNumber != null">-->
+    <!--#{betNumber,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="multiple != null">-->
+    <!--#{multiple,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="moneyMode != null">-->
+    <!--#{moneyMode,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="ifChase != null">-->
+    <!--#{ifChase,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="chaseCount != null">-->
+    <!--#{chaseCount,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="chaseWinStop != null">-->
+    <!--#{chaseWinStop,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="payoff != null">-->
+    <!--#{payoff,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="winPayRate != null">-->
+    <!--#{winPayRate,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="orderStatus != null">-->
+    <!--#{orderStatus,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="source != null">-->
+    <!--#{source,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="remark != null">-->
+    <!--#{remark,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="createTime != null">-->
+    <!--#{createTime,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="createUser != null">-->
+    <!--#{createUser,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="modifyTime != null">-->
+    <!--#{modifyTime,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="modifyUser != null">-->
+    <!--#{modifyUser,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--</trim>-->
+    <!--</insert>-->
+    <!--<update id="updateByPrimaryKeySelective" parameterType="com.babel.forseti_order.model.UserOrderPO">-->
+    <!--update lo_user_order-->
+    <!--<set>-->
+    <!--<if test="userOrderOperId != null">-->
+    <!--user_order_oper_id = #{userOrderOperId,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="platInfoId != null">-->
+    <!--plat_info_id = #{platInfoId,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="ownerInfo != null">-->
+    <!--owner_info = #{ownerInfo,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="parentOrderId != null">-->
+    <!--parent_order_id = #{parentOrderId,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="orderId != null">-->
+    <!--order_id = #{orderId,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="memberId != null">-->
+    <!--member_id = #{memberId,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="lotteryId != null">-->
+    <!--lottery_id = #{lotteryId,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="playId != null">-->
+    <!--play_id = #{playId,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="pcode != null">-->
+    <!--pcode = #{pcode,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="betTime != null">-->
+    <!--bet_time = #{betTime,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="reforwardPoint != null">-->
+    <!--reforward_point = #{reforwardPoint,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="betMode != null">-->
+    <!--bet_mode = #{betMode,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="betCount != null">-->
+    <!--bet_count = #{betCount,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="betAmount != null">-->
+    <!--bet_amount = #{betAmount,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="betNumber != null">-->
+    <!--bet_number = #{betNumber,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="multiple != null">-->
+    <!--multiple = #{multiple,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="moneyMode != null">-->
+    <!--money_mode = #{moneyMode,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="ifChase != null">-->
+    <!--if_chase = #{ifChase,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="chaseCount != null">-->
+    <!--chase_count = #{chaseCount,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="chaseWinStop != null">-->
+    <!--chase_win_stop = #{chaseWinStop,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="payoff != null">-->
+    <!--payoff = #{payoff,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="winPayRate != null">-->
+    <!--win_pay_rate = #{winPayRate,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="orderStatus != null">-->
+    <!--order_status = #{orderStatus,jdbcType=INTEGER},-->
+    <!--</if>-->
+    <!--<if test="source != null">-->
+    <!--source = #{source,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="remark != null">-->
+    <!--remark = #{remark,jdbcType=VARCHAR},-->
+    <!--</if>-->
+    <!--<if test="createTime != null">-->
+    <!--create_time = #{createTime,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="createUser != null">-->
+    <!--create_user = #{createUser,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="modifyTime != null">-->
+    <!--modify_time = #{modifyTime,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--<if test="modifyUser != null">-->
+    <!--modify_user = #{modifyUser,jdbcType=BIGINT},-->
+    <!--</if>-->
+    <!--</set>-->
+    <!--where cid = #{cid,jdbcType=BIGINT}-->
+    <!--</update>-->
+    <!--<update id="updateByPrimaryKey" parameterType="com.babel.forseti_order.model.UserOrderPO">-->
+    <!--update lo_user_order-->
+    <!--set user_order_oper_id = #{userOrderOperId,jdbcType=BIGINT},-->
+    <!--plat_info_id = #{platInfoId,jdbcType=BIGINT},-->
+    <!--owner_info = #{ownerInfo,jdbcType=VARCHAR},-->
+    <!--parent_order_id = #{parentOrderId,jdbcType=VARCHAR},-->
+    <!--order_id = #{orderId,jdbcType=VARCHAR},-->
+    <!--member_id = #{memberId,jdbcType=BIGINT},-->
+    <!--lottery_id = #{lotteryId,jdbcType=BIGINT},-->
+    <!--play_id = #{playId,jdbcType=BIGINT},-->
+    <!--pcode = #{pcode,jdbcType=VARCHAR},-->
+    <!--bet_time = #{betTime,jdbcType=BIGINT},-->
+    <!--reforward_point = #{reforwardPoint,jdbcType=INTEGER},-->
+    <!--bet_mode = #{betMode,jdbcType=BIGINT},-->
+    <!--bet_count = #{betCount,jdbcType=INTEGER},-->
+    <!--bet_amount = #{betAmount,jdbcType=BIGINT},-->
+    <!--bet_number = #{betNumber,jdbcType=VARCHAR},-->
+    <!--multiple = #{multiple,jdbcType=INTEGER},-->
+    <!--money_mode = #{moneyMode,jdbcType=VARCHAR},-->
+    <!--if_chase = #{ifChase,jdbcType=INTEGER},-->
+    <!--chase_count = #{chaseCount,jdbcType=INTEGER},-->
+    <!--chase_win_stop = #{chaseWinStop,jdbcType=INTEGER},-->
+    <!--payoff = #{payoff,jdbcType=BIGINT},-->
+    <!--win_pay_rate = #{winPayRate,jdbcType=INTEGER},-->
+    <!--order_status = #{orderStatus,jdbcType=INTEGER},-->
+    <!--source = #{source,jdbcType=VARCHAR},-->
+    <!--remark = #{remark,jdbcType=VARCHAR},-->
+    <!--create_time = #{createTime,jdbcType=BIGINT},-->
+    <!--create_user = #{createUser,jdbcType=BIGINT},-->
+    <!--modify_time = #{modifyTime,jdbcType=BIGINT},-->
+    <!--modify_user = #{modifyUser,jdbcType=BIGINT}-->
+    <!--where cid = #{cid,jdbcType=BIGINT}-->
+    <!--</update>-->
+
+
+</mapper>

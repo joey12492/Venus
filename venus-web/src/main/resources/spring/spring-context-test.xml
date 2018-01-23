@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://www.springframework.org/schema/aop   
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd   
+        http://www.springframework.org/schema/beans   
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd   
+        http://www.springframework.org/schema/context   
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd"
+	default-autowire="byName" default-lazy-init="false">
+
+	<!-- 采用注释的方式配置bean -->
+	<context:annotation-config />
+
+	<!-- 配置要扫描的包 -->
+	<context:component-scan base-package="com.babel.basedata
+		,com.babel.common.web.loader" />
+	
+	<!-- 这个类，容器启动时加载，以便于加载系统参数到map -->
+   <bean class="com.babel.basedata.util.SysconfigsLoadListener"/>
+   
+   <bean class="com.babel.common.core.service.impl.InjectBeanSelfProcessor"></bean>
+   <bean class="com.babel.basedata.util.Sysconfigs">
+   	<property name="sysconfigService" ref="sysconfigService"/>
+   </bean>
+   <bean id="springContextUtil" class="com.babel.common.core.util.SpringContextUtil"/>  
+	
+	<bean id="logServiceAspect" class="com.babel.basedata.logger.LogServiceAspect"></bean>
+	<bean id="logAspect" class="com.babel.common.web.loader.LogAuditAspect"></bean>
+	<aop:aspectj-autoproxy proxy-target-class="true" >  
+	     <aop:include name="logAspect" />
+	     <aop:include name="logServiceAspect" />  
+	 </aop:aspectj-autoproxy>  
+	
+	<!-- 系统配置参数 -->
+	<bean id="sysconfigs" class="com.babel.basedata.util.Sysconfigs">
+		<property name="properties">
+			<props>
+				<!-- sql日志，不记录以下查询类型，以减少日志量，多个可以“,”隔开 -->  
+                <prop key="sql.logSqlIgnore">select_seq,select_count</prop>
+                <!-- sql日志 ，不记录以下sql中含有此关键字的查询，多个可换行处理 --> 
+                <prop key="sql.ignoreKey">
+                	FROM tf_sysconfig WHERE ( IF_dEL = 0 and STATUS = 1 )
+                </prop>
+                <!-- sql日志，不记录以下mapperId的sql，以减少日志量，多个类可按行处理，单个类多个方法，可在后面以","隔开 -->
+                <prop key="sql.ignoreSqlId">
+                	ModelMapper:selectByExample
+                	LogDbMapper:insert,log
+                </prop>
+                <!-- info,warn级别的sql日志，sql接口执行时间>=以下配置的值才日志（单位ms) -->
+                <prop key="sql.logInfo">0</prop>
+                <prop key="sql.logWarn">2000</prop>
+            </props>
+         </property>
+	</bean>
+
+	
+
+	<!-- proxy-target-class默认"false",更改为"ture"使用CGLib动态代理 -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />	
+	
+	<import resource="spring-mybatis.xml" />
+	<import resource="spring-security.xml" />
+	<import resource="spring-mongo.xml" />
+	<!-- 
+	<import resource="dubbo-provider.xml" />
+	 
+	<import resource="dubbo-consumer-test.xml" />
+	-->
+	
+	<beans profile="develop">
+		<!-- 将多个配置文件读取到容器中，交给Spring管理 -->  
+	    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+	        <property name="locations">  
+	           <list>
+	           	  <value>classpath:service-dev.properties</value> 
+	            </list>  
+	        </property>  
+	    </bean>
+	    <bean id="customizedPropertyConfigurer"
+		    class="com.babel.common.core.util.CustomizedPropertyPlaceholderConfigurer">
+		    <property name="locations">
+		        <list>
+		            <value>classpath:service-dev.properties</value>
+		        </list>
+		    </property>
+		</bean>
+	</beans>
+</beans>

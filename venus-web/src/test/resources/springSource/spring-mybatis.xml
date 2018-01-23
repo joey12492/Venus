@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+
+
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+    <!--
+                logInfo时间(ms)
+                logWarn时间(ms)
+                ignoreSqlKey可用于忽略要计日志的sql关键字，多个可以“,”隔开
+    <bean id="logSqlManager" class="com.babel.basedata.service.impl.LogSqlManagerService">
+        <property name="logDbService" ref="logDbService"/>
+        <property name="modelService" ref="modelService"/>
+            <property name="properties">
+                <value>
+                    sql.logInfo=000
+                    sql.logWarn=2000
+                    sql.ignoreKey=INSERT INTO tf_log_db
+                </value>
+            </property>
+    </bean>-->
+
+
+
+
+    <!-- 基于Druid数据库链接池的数据源配置 -->
+    <bean id="dataSource"
+          class="com.zaxxer.hikari.HikariDataSource" destroy-method="shutdown">
+        <constructor-arg>
+            <bean class="com.zaxxer.hikari.HikariConfig">
+                <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+                <property name="jdbcUrl" value="${mysql.venus.url}"/>
+                <property name="username" value="${mysql.venus.db.user}"/>
+                <property name="password" value="${mysql.venus.db.password}"/>
+                <property name="connectionTestQuery" value="select 1"/>
+                <property name="connectionTimeout" value="60000"/>
+                <property name="idleTimeout" value="300000"/>
+                <property name="maxLifetime" value="1800000"/>
+                <property name="maximumPoolSize" value="50"/>
+                <property name="minimumIdle" value="2"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <!-- 将数据源映射到sqlSessionFactory中 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml" />
+        <property name="dataSource" ref="dataSource" />
+        <!--<property name="mapperLocations" value="classpath*:com/babel/venus/dao/mapper/*.xml"/>-->
+        <property name="plugins">
+            <array>
+                <bean id="sqlInterceptor" class="com.babel.basedata.logger.SqlInterceptor">
+                    <!-- 以下配置优先于数据库的系统参数配置 -->
+                    <property name="properties">
+                        <props>
+                            <prop key="sql.ignoreSqlType">select_seq,select_count</prop>
+                            <prop key="sql.ignoreKey">
+                                FROM tf_sysconfig WHERE ( IF_dEL = 0 and STATUS = 1 )
+                            </prop>
+                            <prop key="sql.ignoreSqlId"><!-- 忽略sql日志处理 -->
+                                ModelMapper:selectByExample
+                                LogDbMapper:insert
+                                LogDbMapper:insertList
+                                ThreadPoolMapper.selectCountByExample
+                            </prop>
+                            <prop key="sql.ignoreSqlIdOnLoad"><!-- 忽略sql日志仅在启动时，前60秒 -->
+                                ModuleMapper.selectByExample
+                                SysconfigMapper.selectByExample
+                                ThreadPoolMapper.selectByExample
+                            </prop>
+                        </props>
+                    </property>
+                </bean>
+                <bean class="com.github.pagehelper.PageHelper">
+                    <!-- 这里的几个配置主要演示如何使用，如果不理解，一定要去掉下面的配置 -->
+                    <property name="properties">
+                        <value>
+                            dialect=mysql
+                            reasonable=true
+                            supportMethodsArguments=true
+                            params=count=countSql
+                            autoRuntimeDialect=true
+                        </value>
+                    </property>
+                </bean>
+            </array>
+        </property>
+    </bean>
+
+    <!-- SqlSession模板类实例 -->
+    <bean id="sessionTemplate" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="close">
+        <constructor-arg index="0" ref="sqlSessionFactory" />
+    </bean>
+
+    <bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.babel.venus.dao.db" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <!-- example处理，所有表的实体属性忽略，即不进行select,insert,update处理 -->
+        <property name="propertyIgnoreAll" value="currentUserId,currentUser,version,create_disp,modify_disp"/>
+        <!-- example处理，具体表的实体属性忽略
+            格式：className=ignoreProperties
+            说明：一个类一行，属性多个以“,”隔开
+         -->
+        <property name="propertyIgnore">
+            <value>
+                com.babel.basedata.model.LookupPO=name
+                com.babel.basedata.model.LookupItemPO=code,name
+                com.babel.basedata.model.UserPO=code
+                com.babel.basedata.model.LogDbPO=code,name,ifDel,status,modifyDate,modifyUser,createUser
+                com.babel.basedata.model.LogMsgPO=code,name,ifDel,status,modifyDate,modifyUser
+                com.babel.basedata.model.LogMsgDetailPO=code,name,ifDel,status,modifyDate,modifyUser,createUser,createDate
+                com.babel.basedata.model.LogLoginPO=code,name,ifDel,status,modifyDate,modifyUser,createUser,createDate,remark
+                com.babel.basedata.model.OptDataPO=code,name,status,modifyDate,modifyUser
+                com.babel.basedata.model.ModelPO=code,name,ifDel,status,modifyDate,modifyUser,createUser
+                com.babel.basedata.model.UserTokenPO=code,name,ifDel,status,modifyUser,createUser
+                com.babel.basedata.model.UserRolePO=code,name
+                com.babel.basedata.model.SysconfigUserPO=code,name,status
+                com.babel.basedata.model.WxEventLogPO=modifyDate,modifyUser,createUser
+                com.babel.basedata.model.ProductKeyPO=name,code
+                com.babel.basedata.model.ProductCdkeyPO=createUser,modifyUser,ifDel
+                com.babel.basedata.model.PassiveReplyPO=name
+
+                com.babel.ext.model.TableDefinePO=code,name
+                com.babel.ext.model.DataColumnPO=code,name
+                com.babel.ext.model.DataRowPO=code,name
+
+                com.babel.venus.po.UserOrder=winNumber,lotteryType,betContentProc
+
+            </value>
+        </property>
+        <!-- -->
+        <property name="markerInterface" value="tk.mybatis.mapper.common.MapperMy"/>
+    </bean>
+
+    <!--======= 事务配置 Begin ================= -->
+    <!-- 事务管理器（由Spring管理MyBatis的事务） -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- 关联数据源 -->
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!--======= 事务配置 End =================== -->
+
+    <!--
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" scope="prototype">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+    </bean>
+     -->
+
+    <!--  -->
+    <aop:config>
+        <aop:pointcut id="appService" expression="execution(* com.babel.venus.service.*ServiceImpl*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="appService"/>
+    </aop:config>
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="select*" read-only="true"/>
+            <tx:method name="find*" read-only="true"/>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+
+
+</beans>
